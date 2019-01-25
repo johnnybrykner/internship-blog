@@ -25,7 +25,7 @@ export default {
     }
   },
   created() {
-    console.log(this.postTexts)
+  
   }
 }
 </script>
@@ -33,5 +33,10 @@ export default {
 <style scoped>
   article {
     background-color: #eee;
+  }
+  h2 {
+    font-weight: bold;
+    font-size: 1.5rem;
+    padding: 1rem 0 0 .5rem;
   }
 </style>
