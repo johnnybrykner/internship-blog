@@ -25,7 +25,7 @@ export default {
     }
   },
   created() {
-  
+
   }
 }
 </script>
@@ -33,6 +33,7 @@ export default {
 <style scoped>
   article {
     background-color: #eee;
+    margin-bottom: 2rem;
   }
   h2 {
     font-weight: bold;
