@@ -1,6 +1,7 @@
 <template>
   <article>
     <h2>{{ post.title.rendered }}</h2>
+    <small>Posted on {{ postDate }}</small>
     <p
       v-for="text in postTexts"
       :key="text.id"
@@ -13,6 +14,11 @@
 <script>
 export default {
   name: 'ItemPost',
+  data() {
+    return {
+      postDate: this.post.date.slice(1).join('.')
+    }
+  },
   props: {
     post: {
       required: true,
@@ -20,12 +26,9 @@ export default {
     }
   },
   computed: {
-    postTexts () {
+    postTexts() {
       return this.post.content.rendered.split(/[<>]/).filter(phrase => phrase.charAt(0).match(/[A-Z]/))
     }
-  },
-  created() {
-
   }
 }
 </script>
@@ -39,5 +42,9 @@ export default {
     font-weight: bold;
     font-size: 1.5rem;
     padding: 1rem 0 0 .5rem;
+  }
+  small {
+    font-size: .7rem;
+    padding-left: .5rem;
   }
 </style>

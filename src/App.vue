@@ -7,7 +7,7 @@
       <img src="./assets/loading.gif" alt="Loading...">
     </div>
     <h1>Welcome to my internship blog!</h1>
-    <p>I will try my best to post on time, but you know, human brain was invented to forget... Last modified <em>{{ lastModified }} ago.</em></p>
+    <p>I will try my best to post on time, but you know, human brain was made to forget... Last modified <em>{{ lastModified }} ago.</em></p>
     <item-post
       v-for="post in posts"
       :key="post.id"
@@ -48,6 +48,9 @@ export default {
       this.lastModified[i] = this.currentDate[i] - this.posts[0].date[i]
     }
     switch (this.lastModified.findIndex(item => item===0)) {
+      case 0:
+        this.lastModified = this.lastModified[0] + ' hours';
+        break;
       case 1:
         this.lastModified = this.lastModified[0] + (this.lastModified[0]===1 ? ' hour' : ' hours');
         break;
@@ -69,9 +72,10 @@ export default {
   @import url('https://meyerweb.com/eric/tools/css/reset/reset.css');
   @import url('https://fonts.googleapis.com/css?family=Sintony');
   section {
-    margin: 0 2rem;
+    margin: 0 auto;
     font-family: 'Sintony', sans-serif;
     line-height: 2rem;
+    max-width: 80%;
   }
   h1 {
     font-weight: bold;
