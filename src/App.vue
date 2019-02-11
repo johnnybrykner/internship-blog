@@ -4,7 +4,7 @@
       v-if="loading===true"
       class="loading"
     >
-      <img src="./assets/loading.gif" alt="Loading...">
+      <paper-spinner active></paper-spinner>
     </div>
     <h1>Welcome to my internship blog!</h1>
     <p>I will try my best to post on time, but you know, human brain was made to forget... Last modified <em>{{ lastModified }} ago.</em></p>
@@ -17,7 +17,9 @@
 </template>
 
 <script>
-import ItemPost from './components/ItemPost'
+import ItemPost from './components/ItemPost';
+import '@polymer/paper-spinner/paper-spinner.js';
+import firebase from "firebase";
 export default {
   name: 'app',
   components: {
@@ -28,7 +30,8 @@ export default {
       loading: true,
       posts: [],
       currentDate: [new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate(), new Date().getHours()].reverse(),
-      lastModified: []
+      lastModified: [],
+      dbLength: '',
     }
   },
   methods: {
@@ -62,6 +65,14 @@ export default {
         break;
       default:
         this.lastModified = this.lastModified[3] + (this.lastModified[3]===1 ? ' year' : ' years');
+    }
+    firebase.database().ref('reads').on('value', snapshot => this.dbLength=(Object.keys(snapshot.val()).length));
+    console.log(this.dbLength);
+    if (this.dbLength-1!==this.posts.length) {
+     for (let i=this.dbLength-1; i<this.posts.length; i++) {
+       console.log(i, 'push')
+       // firebase.database().ref('reads').push().set(false)
+     }
     }
     this.loading = false;
   }
