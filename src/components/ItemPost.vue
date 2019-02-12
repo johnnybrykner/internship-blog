@@ -1,9 +1,9 @@
 <template>
-  <paper-card>
-    <paper-button raised :disabled='this.seen' @click="mark">
+  <paper-card :class="{ new: !postSeen }">
+    <paper-button raised :disabled='this.postSeen' @click="mark">
       <iron-icon icon='visibility'></iron-icon>
-      <p v-if='!this.seen'>Mark as seen</p>
-      <p v-if='this.seen'>Seen</p>
+      <p v-if='!this.postSeen'>Mark as seen</p>
+      <p v-if='this.postSeen'>Seen</p>
     </paper-button>
     <article class="card-content">
       <paper-tooltip position='left'>Posted on {{ postDate }}</paper-tooltip>
@@ -30,7 +30,7 @@ export default {
   data() {
     return {
       postDate: this.post.date.slice(1).join('.'),
-      seen: false,
+      postSeen: '',
     }
   },
   props: {
@@ -42,12 +42,20 @@ export default {
   computed: {
     postTexts() {
       return this.post.content.rendered.split(/[<>]/).filter(phrase => phrase.charAt(0).match(/[A-Z]/))
+    },
+  },
+  watch: {
+    postSeen: {
+      handler: function() { firebase.database().ref('reads').child(this.post.id).once('value')
+                .then(snapshot => this.postSeen = snapshot.val())
+      },
+      immediate: true,
     }
   },
   methods: {
     mark() {
-      this.seen = true;
-      firebase.database().ref('reads').push().set(this.seen);
+      this.postSeen = true;
+      firebase.database().ref('reads').child(this.post.id).set(true);
     }
   }
 }
@@ -58,6 +66,9 @@ export default {
     width: 100%;
     margin-bottom: 2rem;
   }
+  paper-card.new {
+    border: .5px yellowgreen solid;
+  }
   h2 {
     font-weight: bold;
     font-size: 1.5rem;
@@ -67,7 +78,8 @@ export default {
     padding: 0;
     margin: 0;
     text-transform: lowercase;
-    margin-left: 50%;
-    transform: translateX(-50%);
+    margin-left: 100%;
+    transform: translateX(-100%);
+    width: 150px;
   }
 </style>

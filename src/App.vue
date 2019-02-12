@@ -31,7 +31,6 @@ export default {
       posts: [],
       currentDate: [new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate(), new Date().getHours()].reverse(),
       lastModified: [],
-      dbLength: '',
     }
   },
   methods: {
@@ -46,6 +45,9 @@ export default {
     this.posts = await this.getJson();
     for (let i=0; i<this.posts.length; i++) {
       this.posts[i].date = this.posts[i].date.split(/[-T:]/).map(item => Number(item)).slice(0, 4).reverse()
+      if (!firebase.database().ref('reads').child(this.posts[i].id)) {
+        firebase.database().ref('reads').child(this.posts[i].id).set(false)
+      }
     }
     for (let i=0; i<4; i++) {
       this.lastModified[i] = this.currentDate[i] - this.posts[0].date[i]
@@ -65,14 +67,6 @@ export default {
         break;
       default:
         this.lastModified = this.lastModified[3] + (this.lastModified[3]===1 ? ' year' : ' years');
-    }
-    firebase.database().ref('reads').on('value', snapshot => this.dbLength=(Object.keys(snapshot.val()).length));
-    console.log(this.dbLength);
-    if (this.dbLength-1!==this.posts.length) {
-     for (let i=this.dbLength-1; i<this.posts.length; i++) {
-       console.log(i, 'push')
-       // firebase.database().ref('reads').push().set(false)
-     }
     }
     this.loading = false;
   }
