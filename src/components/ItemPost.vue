@@ -1,9 +1,12 @@
 <template>
   <paper-card :class="{ new: !postSeen }">
     <paper-button raised :disabled='this.postSeen' @click="mark">
-      <iron-icon icon='visibility'></iron-icon>
-      <p v-if='!this.postSeen'>Mark as seen</p>
-      <p v-if='this.postSeen'>Seen</p>
+      <paper-spinner active v-if="loading"></paper-spinner>
+      <figure v-else>
+        <iron-icon icon='visibility'></iron-icon>
+        <p v-if='!this.postSeen'>Mark as seen</p>
+        <p v-if='this.postSeen'>Seen</p>
+      </figure>
     </paper-button>
     <article class="card-content">
       <paper-tooltip position='left'>Posted on {{ postDate }}</paper-tooltip>
@@ -31,6 +34,7 @@ export default {
     return {
       postDate: this.post.date.slice(1).join('.'),
       postSeen: '',
+      loading: true,
     }
   },
   props: {
@@ -44,13 +48,10 @@ export default {
       return this.post.content.rendered.split(/[<>]/).filter(phrase => phrase.charAt(0).match(/[A-Z]/))
     },
   },
-  watch: {
-    postSeen: {
-      handler: function() { firebase.database().ref('reads').child(this.post.id).once('value')
-                .then(snapshot => this.postSeen = snapshot.val())
-      },
-      immediate: true,
-    }
+  async created() {
+    await firebase.database().ref('reads').child(this.post.id).once('value')
+      .then(snapshot => this.postSeen = snapshot.val())
+    this.loading = false;
   },
   methods: {
     mark() {
@@ -81,5 +82,10 @@ export default {
     margin-left: 100%;
     transform: translateX(-100%);
     width: 150px;
+  }
+  figure {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
   }
 </style>

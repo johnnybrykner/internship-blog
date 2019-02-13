@@ -6,24 +6,39 @@
     >
       <paper-spinner active></paper-spinner>
     </div>
-    <h1>Welcome to my internship blog!</h1>
-    <p>I will try my best to post on time, but you know, human brain was made to forget... Last modified <em>{{ lastModified }} ago.</em></p>
-    <item-post
-      v-for="post in posts"
-      :key="post.id"
-      :post="post"
-    ></item-post>
+    <paper-button raised @click="logOut" class="button--logout active" v-if="loggedIn!==null">Log Out</paper-button>
+    <section v-if="!loggedIn">
+      <paper-button raised @click="accountActionToggle" class="button--account" :class="{ active: accountAction }">Log In</paper-button>
+      <section v-if="accountAction">
+        <log-in @logClosed='activateSignUp' :active='logInActive' v-if="logInActive"></log-in>
+        <sign-up @signClosed='activateLogIn' :active='signUpActive' v-else></sign-up>
+      </section>
+    </section>
+    <section v-if="loggedIn">
+      <h1>Welcome to my internship blog!</h1>
+      <p>I will try my best to post on time, but you know, human brain was made to forget... Last modified <em>{{ lastModified }} ago.</em></p>
+      <item-post
+        v-for="post in posts"
+        :key="post.id"
+        :post="post"
+      ></item-post>
+    </section>
   </section>
 </template>
 
 <script>
 import ItemPost from './components/ItemPost';
+import LogIn from './components/LogIn';
+import SignUp from './components/SignUp';
 import '@polymer/paper-spinner/paper-spinner.js';
+import '@polymer/paper-button/paper-button.js';
 import firebase from "firebase";
 export default {
   name: 'app',
   components: {
-    ItemPost
+    ItemPost,
+    LogIn,
+    SignUp,
   },
   data() {
     return {
@@ -31,6 +46,10 @@ export default {
       posts: [],
       currentDate: [new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate(), new Date().getHours()].reverse(),
       lastModified: [],
+      logInActive: false,
+      signUpActive: false,
+      accountAction: false,
+      loggedIn: null,
     }
   },
   methods: {
@@ -39,6 +58,28 @@ export default {
         .then(response =>
           response.json()
         )
+    },
+    activateLogIn() {
+      this.logInActive = true;
+      this.signUpActive = false;
+    },
+    activateSignUp() {
+      this.logInActive = false;
+      this.signUpActive = true;
+    },
+    accountActionToggle() {
+      this.accountAction = !this.accountAction;
+    },
+    logOut() {
+      firebase.auth().signOut()
+        .then(() => this.loggedIn = '')
+    }
+  },
+  watch: {
+    logInActive: {
+      handler: function() {
+        this.loggedIn = firebase.auth().currentUser
+      }
     }
   },
   async created() {
@@ -104,5 +145,21 @@ export default {
   }
   em {
     font-weight: bold;
+  }
+  .button--account {
+    margin-top: 50%;
+    margin-left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+  }
+  .button--account {
+    background-color: var(--paper-green-500);
+    color: white;
+  }
+  .button--logout {
+    float: right;
+  }
+  .active {
+    background-color: var(--paper-indigo-500);
+    color: white;
   }
 </style>
