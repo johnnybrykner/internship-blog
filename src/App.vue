@@ -8,10 +8,10 @@
     </div>
     <paper-button raised @click="logOut" class="button--logout active" v-if="loggedIn!==null">Log Out</paper-button>
     <section v-if="!loggedIn">
-      <paper-button raised @click="accountActionToggle" class="button--account" :class="{ active: accountAction }">Log In</paper-button>
+      <paper-button raised @click="accountActionToggle" class="button--account" :class="{ active: accountAction }" v-if="accountAction===false">Log In to continue</paper-button>
       <section v-if="accountAction">
-        <log-in @logClosed='activateSignUp' :active='logInActive' v-if="logInActive"></log-in>
-        <sign-up @signClosed='activateLogIn' :active='signUpActive' v-else></sign-up>
+        <log-in @logClosed='activateSignUp' @verified='verifyUser' :active='logInActive' v-if="logInActive"></log-in>
+        <sign-up @signClosed='activateLogIn' @verified='verifyUser' :active='signUpActive' v-else></sign-up>
       </section>
     </section>
     <section v-if="loggedIn">
@@ -73,14 +73,10 @@ export default {
     logOut() {
       firebase.auth().signOut()
         .then(() => this.loggedIn = '')
-    }
-  },
-  watch: {
-    logInActive: {
-      handler: function() {
-        this.loggedIn = firebase.auth().currentUser
-      }
-    }
+    },
+    verifyUser() {
+      this.loggedIn = firebase.auth().currentUser
+    },
   },
   async created() {
     this.posts = await this.getJson();

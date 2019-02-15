@@ -53,8 +53,8 @@ export default {
     signUp: function() {
       firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
         .then(function() {
-          alert('Your account has been successfully created.')
-        })
+          this.$emit('verified')
+        }.bind(this))
     }
   },
 }
@@ -77,6 +77,12 @@ export default {
     cursor: pointer;
     text-align: center;
     text-decoration: underline;
+  }
+  paper-button {
+    background-color: var(--paper-indigo-500);
+    color: white;
+    margin-left: 50%;
+    transform: translateX(-50%);
   }
   input {
     border: none;
