@@ -82,7 +82,7 @@ export default {
       this.loading = false;
     },
     getJson() {
-      return fetch('http://viitek.dk/wp/wp-json/wp/v2/posts')
+      return fetch('https://viitek.dk/wp/wp-json/wp/v2/posts')
         .then(response =>
           response.json()
         )
