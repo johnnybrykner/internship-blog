@@ -55,6 +55,9 @@ export default {
         .then(function() {
           this.$emit('verified')
         }.bind(this))
+        .catch(function(error) {
+          alert(error.message)
+        })
     }
   }
 }
@@ -88,5 +91,6 @@ export default {
     border: none;
     outline: none;
     background: transparent;
+    width: 100%;
   }
 </style>

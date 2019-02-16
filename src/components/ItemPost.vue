@@ -41,6 +41,10 @@ export default {
     post: {
       required: true,
       type: Object
+    },
+    user: {
+      required: true,
+      type: String,
     }
   },
   computed: {
@@ -49,14 +53,14 @@ export default {
     },
   },
   async created() {
-    await firebase.database().ref('reads').child(this.post.id).once('value')
+    await firebase.database().ref('users').child(this.user).child('seens').child(this.post.id).once('value')
       .then(snapshot => this.postSeen = snapshot.val())
     this.loading = false;
   },
   methods: {
     mark() {
       this.postSeen = true;
-      firebase.database().ref('reads').child(this.post.id).set(true);
+      firebase.database().ref('users').child(this.user).child('seens').child(this.post.id).set(true);
     }
   }
 }

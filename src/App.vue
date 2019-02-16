@@ -7,20 +7,21 @@
       <paper-spinner active></paper-spinner>
     </div>
     <paper-button raised @click="logOut" class="button--logout active" v-if="loggedIn!==null">Log Out</paper-button>
+    <h1>Welcome to my internship blog!</h1>
+    <paper-button raised @click="accountActionToggle" class="button--account" v-if="accountAction===false">Log In to continue</paper-button>
     <section v-if="!loggedIn">
-      <paper-button raised @click="accountActionToggle" class="button--account" :class="{ active: accountAction }" v-if="accountAction===false">Log In to continue</paper-button>
       <section v-if="accountAction">
         <log-in @logClosed='activateSignUp' @verified='verifyUser' :active='logInActive' v-if="logInActive"></log-in>
         <sign-up @signClosed='activateLogIn' @verified='verifyUser' :active='signUpActive' v-else></sign-up>
       </section>
     </section>
     <section v-if="loggedIn">
-      <h1>Welcome to my internship blog!</h1>
       <p>I will try my best to post on time, but you know, human brain was made to forget... Last modified <em>{{ lastModified }} ago.</em></p>
       <item-post
         v-for="post in posts"
         :key="post.id"
         :post="post"
+        :user="loggedIn"
       ></item-post>
     </section>
   </section>
@@ -42,7 +43,7 @@ export default {
   },
   data() {
     return {
-      loading: true,
+      loading: null,
       posts: [],
       currentDate: [new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate(), new Date().getHours()].reverse(),
       lastModified: [],
@@ -53,6 +54,33 @@ export default {
     }
   },
   methods: {
+    async init() {
+      this.loading = true;
+      this.posts = await this.getJson();
+      for (let i=0; i<this.posts.length; i++) {
+        this.posts[i].date = this.posts[i].date.split(/[-T:]/).map(item => Number(item)).slice(0, 4).reverse()
+      }
+      for (let i=0; i<4; i++) {
+        this.lastModified[i] = this.currentDate[i] - this.posts[0].date[i]
+      }
+      switch (this.lastModified.reverse().findIndex(item => item!==0)) {
+        case 0:
+          this.lastModified = this.lastModified[0] + (this.lastModified[0]===1 ? ' year' : ' years');
+          break;
+        case 1:
+          this.lastModified = this.lastModified[1] + (this.lastModified[1]===1 ? ' month' : ' months');
+          break;
+        case 2:
+          this.lastModified = this.lastModified[2] + (this.lastModified[2]===1 ? ' day' : ' days');
+          break;
+        case 3:
+          this.lastModified = this.lastModified[3] + (this.lastModified[3]===1 ? ' hour' : ' hours');
+          break;
+        default:
+          this.lastModified = this.lastModified[3] + ' hours';
+      }
+      this.loading = false;
+    },
     getJson() {
       return fetch('http://viitek.dk/wp/wp-json/wp/v2/posts')
         .then(response =>
@@ -72,40 +100,18 @@ export default {
     },
     logOut() {
       firebase.auth().signOut()
-        .then(() => this.loggedIn = '')
+        .then(() => this.loggedIn = null)
     },
     verifyUser() {
-      this.loggedIn = firebase.auth().currentUser
+      this.loggedIn = firebase.auth().currentUser.uid;
     },
   },
-  async created() {
-    this.posts = await this.getJson();
-    for (let i=0; i<this.posts.length; i++) {
-      this.posts[i].date = this.posts[i].date.split(/[-T:]/).map(item => Number(item)).slice(0, 4).reverse()
-      if (!firebase.database().ref('reads').child(this.posts[i].id)) {
-        firebase.database().ref('reads').child(this.posts[i].id).set(false)
+  created() {
+    firebase.auth().onAuthStateChanged(function(status) {
+      if (status !== null) {
+        this.init()
       }
-    }
-    for (let i=0; i<4; i++) {
-      this.lastModified[i] = this.currentDate[i] - this.posts[0].date[i]
-    }
-    switch (this.lastModified.findIndex(item => item===0)) {
-      case 0:
-        this.lastModified = this.lastModified[0] + ' hours';
-        break;
-      case 1:
-        this.lastModified = this.lastModified[0] + (this.lastModified[0]===1 ? ' hour' : ' hours');
-        break;
-      case 2:
-        this.lastModified = this.lastModified[1] + (this.lastModified[1]===1 ? ' day' : ' days');
-        break;
-      case 3:
-        this.lastModified = this.lastModified[2] + (this.lastModified[2]===1 ? ' month' : ' months');
-        break;
-      default:
-        this.lastModified = this.lastModified[3] + (this.lastModified[3]===1 ? ' year' : ' years');
-    }
-    this.loading = false;
+    }.bind(this))
   }
 }
 </script>
@@ -138,23 +144,19 @@ export default {
     height: 100%;
     width: 100%;
     background-color: white;
+    z-index: 2;
   }
   em {
     font-weight: bold;
   }
   .button--account {
-    margin-top: 50%;
-    margin-left: 50%;
-    transform: translateY(-50%) translateX(-50%);
-  }
-  .button--account {
-    background-color: var(--paper-green-500);
+    background-color: var(--paper-indigo-500);
     color: white;
+    margin-left: 50%;
+    transform: translateX(-50%);
   }
   .button--logout {
     float: right;
-  }
-  .active {
     background-color: var(--paper-indigo-500);
     color: white;
   }

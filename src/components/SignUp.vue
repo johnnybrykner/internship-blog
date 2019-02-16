@@ -15,7 +15,7 @@
         </iron-input>
       </paper-input-container>
       <paper-button raised @click="signUp">Submit</paper-button>
-      <p @click='activated=false'>Or go back to LogIn</p>
+      <p @click='activated=false'>Or go back to Log In</p>
     </section>
   </paper-card>
 </template>
@@ -55,6 +55,9 @@ export default {
         .then(function() {
           this.$emit('verified')
         }.bind(this))
+        .catch(function(error) {
+          alert(error.message)
+        })
     }
   },
 }
@@ -88,5 +91,6 @@ export default {
     border: none;
     outline: none;
     background: transparent;
+    width: 100%;
   }
 </style>
